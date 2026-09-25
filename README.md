@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DUIT by classy — Web Akuntansi & Kas Kelas
 
-## Getting Started
+Aplikasi web pencatatan keuangan dan transparansi kas bulanan kelas yang terintegrasi langsung dengan platform akademik **Classy** ([classy.exars.my.id](https://classy.exars.my.id)).
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Fitur Unggulan
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Dashboard Pengeluaran Kas & Bukti Nota Fisik (Default View)**:
+   - Pantau riwayat belanja kelas, kategori belanja, nominal, dan bukti foto struk/nota fisik.
+   - Filter pencarian cepat dan kategori (*Operasional, Kebersihan, Fotokopi, Konsumsi, Wishlist*).
+2. **Kas Bulanan (Semester Ganjil & Genap)**:
+   - Pencatatan format bulanan dengan matriks transparansi pembayaran per siswa.
+   - 1-Click WhatsApp reminder ke siswa penunggak atau broadcast tagihan ke grup kelas.
+3. **Modal "Kumpulin Kas"**:
+   - Pembayaran fleksibel via QRIS dinamis, transfer Bank/E-Wallet (1-click copy no rekening), atau tunai.
+   - Kirim bukti konfirmasi pembayaran otomatis via WhatsApp ke nomor bendahara.
+4. **Wishlist Pengadaan Kelas**:
+   - Tentukan target barang kebutuhan kelas (misal: kipas angin, dispenser, dispenser sabun, dekorasi).
+   - Alokasi dana kas langsung dari saldo aktif dengan progress bar tercapai/proses.
+5. **Sinkronisasi Otomatis Database Classy**:
+   - Terhubung langsung ke workspace **M.Log B (26B)** dari Classy untuk sinkronisasi daftar mahasiswa dan nomor kontak.
+6. **Ekspor & Cetak Laporan (Mading Mode)**:
+   - Unduh rekapan lengkap dalam file Excel (.CSV).
+   - Tampilan cetak ramah printer / simpan PDF untuk arsip mading kelas.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Cara Menjalankan di Lokal
 
-## Learn More
+1. **Jalankan Development Server**:
+   ```bash
+   npm run dev
+   ```
+2. Buka peramban di [http://localhost:3000](http://localhost:3000).
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔒 Akses Default Bendahara
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **PIN Default**: `1234`
+- Klik tombol **"Masuk Bendahara"** di pojok kanan atas, lalu masukkan angka `1234`.
+- Anda dapat mengganti PIN ini kapan saja di tab **"Siswa & Pengaturan"** -> **"Profil & Pengaturan"**.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## ☁️ Menghubungkan ke Supabase (Opsional / Siap Pakai)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Aplikasi ini sudah dilengkapi dengan **penyimpanan lokal otomatis (LocalStorage)** sehingga langsung dapat digunakan dan datanya tersimpan di peramban.
+
+Untuk mengaktifkan sinkronisasi cloud real-time dengan project Supabase Anda:
+1. Buka Supabase Dashboard project Anda di:
+   [https://supabase.com/dashboard/project/qgdwpxqqybvtdogydgxa](https://supabase.com/dashboard/project/qgdwpxqqybvtdogydgxa)
+2. Masuk ke menu **SQL Editor**, buka file `supabase/schema.sql` dari proyek ini, lalu klik **Run** untuk membuat tabel dan data awal.
+3. Salin **anon public key** dari menu **Settings -> API**, lalu masukkan ke file `.env.local`:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://qgdwpxqqybvtdogydgxa.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=masukkan_anon_key_anda_disini
+   ```
+4. Restart development server (`npm run dev`).
