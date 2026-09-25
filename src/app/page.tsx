@@ -37,7 +37,6 @@ import {
   FileSpreadsheet,
   Coins,
   Sparkles,
-  ExternalLink,
 } from "lucide-react";
 
 export default function Home() {
@@ -541,32 +540,6 @@ export default function Home() {
             />
           )}
         </div>
-
-        {/* Cloud Info Banner */}
-        {!isSupabaseConfigured && (
-          <div className="p-4 sm:p-5 rounded-3xl bg-[#0F172A] text-white border border-slate-800 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mt-8">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <h4 className="text-sm font-bold text-white">
-                  DUIT by classy — Terhubung ke Database Classy
-                </h4>
-              </div>
-              <p className="text-xs text-slate-300">
-                Data anggota kelas disinkronkan langsung dari <strong>classy.exars.my.id</strong> ({profile.class_name}). Transaksi kas kamu tersimpan otomatis dan dapat diekspor kapan saja.
-              </p>
-            </div>
-            <a
-              href="https://classy.exars.my.id"
-              target="_blank"
-              rel="noreferrer"
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-[#0F172A] transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0"
-            >
-              <span>Buka Web Classy</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
-        )}
       </main>
 
       {/* 3. Footer */}
