@@ -16,6 +16,9 @@ import {
   Sparkles,
   Download,
   AlertCircle,
+  Search,
+  ChevronDown,
+  User,
 } from "lucide-react";
 
 interface CollectCashModalProps {
@@ -51,7 +54,49 @@ export const CollectCashModal: React.FC<CollectCashModalProps> = ({
   const [copiedAccount, setCopiedAccount] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
 
+  // Searchable student combobox states
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [studentSearchQuery, setStudentSearchQuery] = useState("");
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      setIsDropdownOpen(false);
+      setStudentSearchQuery("");
+    }
+  }, [isOpen]);
+
+  // Keep selectedStudentId valid
+  React.useEffect(() => {
+    if (!selectedStudentId && students.length > 0) {
+      setSelectedStudentId(students[0].id);
+    }
+  }, [students, selectedStudentId]);
+
   if (!isOpen) return null;
+
+  const activeStudents = students.filter((s) => s.is_active);
+  const filteredStudents = activeStudents.filter((s) => {
+    if (!studentSearchQuery.trim()) return true;
+    const query = studentSearchQuery.toLowerCase();
+    const matchName = s.name.toLowerCase().includes(query);
+    const matchAbsen =
+      s.attendance_number.toString().includes(query) ||
+      `#${s.attendance_number}`.includes(query) ||
+      `no ${s.attendance_number}`.includes(query) ||
+      `no. ${s.attendance_number}`.includes(query);
+    return matchName || matchAbsen;
+  });
 
   const selectedStudent = students.find((s) => s.id === selectedStudentId);
   const totalAmount = selectedPeriodIds.reduce((sum, pId) => {
@@ -156,24 +201,152 @@ export const CollectCashModal: React.FC<CollectCashModalProps> = ({
           </div>
         </div>
 
-        {/* 1. Pilih Siswa */}
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-[#475569] mb-1.5">
-            1. Pilih Siswa Pembayar
-          </label>
-          <select
-            value={selectedStudentId}
-            onChange={(e) => setSelectedStudentId(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm bg-[#F8FAFC] border border-[#E2E8F0] text-[#0F172A] font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+        {/* 1. Pilih Siswa Pembayar (Searchable Combobox) */}
+        <div className="relative" ref={dropdownRef}>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-[#475569]">
+              1. Pilih Siswa Pembayar
+            </label>
+            <span className="text-[11px] font-semibold text-slate-400">
+              {activeStudents.length} siswa terdaftar
+            </span>
+          </div>
+
+          {/* Trigger Button */}
+          <button
+            type="button"
+            onClick={() => setIsDropdownOpen((prev) => !prev)}
+            className={`w-full px-3.5 py-2.5 sm:py-3 rounded-2xl bg-[#F8FAFC] hover:bg-white border text-left flex items-center justify-between transition-all duration-200 cursor-pointer shadow-2xs ${
+              isDropdownOpen
+                ? "border-emerald-500 ring-2 ring-emerald-500/20 bg-white"
+                : "border-[#E2E8F0] hover:border-slate-300"
+            }`}
           >
-            {students
-              .filter((s) => s.is_active)
-              .map((s) => (
-                <option key={s.id} value={s.id}>
-                  No. {s.attendance_number} — {s.name} ({s.gender})
-                </option>
-              ))}
-          </select>
+            {selectedStudent ? (
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 font-extrabold text-xs flex items-center justify-center shrink-0 border border-emerald-200">
+                  #{selectedStudent.attendance_number}
+                </div>
+                <div className="min-w-0 truncate">
+                  <span className="font-bold text-xs sm:text-sm text-[#0F172A] block truncate">
+                    {selectedStudent.name}
+                  </span>
+                  {selectedStudent.phone_number ? (
+                    <span className="text-[11px] text-slate-500 block truncate">
+                      WA: +{selectedStudent.phone_number}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-slate-400 italic block">
+                      Tanpa nomor WA
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <span className="text-xs sm:text-sm text-slate-400 font-medium">
+                Pilih siswa pembayar...
+              </span>
+            )}
+
+            <div className="flex items-center gap-2 shrink-0 ml-2">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 hidden sm:inline-block">
+                Cari & Pilih
+              </span>
+              <ChevronDown
+                className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                  isDropdownOpen ? "rotate-180 text-emerald-600" : ""
+                }`}
+              />
+            </div>
+          </button>
+
+          {/* Dropdown Menu Popover */}
+          {isDropdownOpen && (
+            <div className="absolute top-full left-0 right-0 mt-2 z-50 rounded-2xl bg-white border border-[#E2E8F0] shadow-xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150">
+              {/* Search input field inside dropdown */}
+              <div className="p-2.5 border-b border-[#F1F5F9] bg-[#F8FAFC]">
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Ketik nama atau no. absen siswa..."
+                    value={studentSearchQuery}
+                    onChange={(e) => setStudentSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-8 py-2 rounded-xl text-xs sm:text-sm bg-white border border-[#E2E8F0] text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium"
+                  />
+                  {studentSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setStudentSearchQuery("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Student List */}
+              <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5">
+                {filteredStudents.length === 0 ? (
+                  <div className="p-6 text-center text-slate-400">
+                    <User className="w-6 h-6 mx-auto mb-1 opacity-40 text-slate-400" />
+                    <p className="text-xs font-semibold text-slate-600">Siswa tidak ditemukan</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      Tidak ada nama atau absen yang cocok dengan &quot;{studentSearchQuery}&quot;
+                    </p>
+                  </div>
+                ) : (
+                  filteredStudents.map((s) => {
+                    const isSelected = s.id === selectedStudentId;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedStudentId(s.id);
+                          setIsDropdownOpen(false);
+                          setStudentSearchQuery("");
+                        }}
+                        className={`w-full px-3 py-2 rounded-xl text-left flex items-center justify-between transition-colors cursor-pointer ${
+                          isSelected
+                            ? "bg-emerald-50 text-emerald-900 font-bold"
+                            : "hover:bg-[#F8FAFC] text-[#0F172A]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span
+                            className={`w-7 h-7 rounded-lg text-xs font-extrabold flex items-center justify-center shrink-0 ${
+                              isSelected
+                                ? "bg-emerald-600 text-white"
+                                : "bg-slate-100 text-slate-600"
+                            }`}
+                          >
+                            #{s.attendance_number}
+                          </span>
+                          <div className="min-w-0 truncate">
+                            <span className="text-xs sm:text-sm font-semibold block truncate">
+                              {s.name}
+                            </span>
+                            {s.phone_number && (
+                              <span className="text-[10px] text-slate-400 block truncate">
+                                +{s.phone_number}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {isSelected && (
+                          <Check className="w-4 h-4 text-emerald-600 shrink-0 ml-2" />
+                        )}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 2. Pilih Bulan Tagihan */}
